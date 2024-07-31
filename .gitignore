@@ -1,3 +1,4 @@
 .DS_Store
 .pytest_cache
-survey_tools/__pycache__/
+tests/__pycache__/
+src/survey_tools/__pycache__
