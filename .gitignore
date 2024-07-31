@@ -1,0 +1,3 @@
+.DS_Store
+.pytest_cache
+survey_tools/__pycache__/
