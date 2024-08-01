@@ -122,8 +122,9 @@ def tabs(data, var1, var2 = None, var3=None, wts = None, display = "count", drop
         categories2 = list(var2.value_counts().index)
         categories3 = list(var3.value_counts().index)
         
-        if var3.cat.ordered:
-            categories3 = list(var3.cat.categories)
+        if str(var3.dtype) == "cat":
+            if var3.cat.ordered:
+                categories3 = list(var3.cat.categories)
         
         if not dropna:
             categories1.append("NaN")
@@ -202,7 +203,7 @@ def tabs(data, var1, var2 = None, var3=None, wts = None, display = "count", drop
             return response.apply(lambda a: round(a/sum(a),3)*100).fillna(0)
     if display == "cell":
         if isinstance(response, pd.Series):
-            return round(response/sum(response)*100,3)
+            return round(response/sum(response),3) * 100
         else: 
             base = response.sum().sum() #summing rows and columns
             def quick_cell(val):
@@ -381,11 +382,35 @@ def get_names(data, match_str):
     assert isinstance(match_str, str), '`match_str` must be a `str`'
     return list(data.filter(regex=match_str).columns)
 
-# test_data_all = pd.DataFrame({
-#     "a" : [1,2,3,4,5,1,2,3,4,5],
-#     "b" : [1,2,3,4,9,9,9,3,2,1],
-#     "c" : [9,8,7,6,5,4,3,2,1,1],
-#     'wts' : [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,2]
-# })
+test_data_all = pd.DataFrame({
+    "a" : [1,2,3,4,5,1,2,3,4,5],
+    "b" : [1,2,3,4,9,9,9,3,2,1],
+    "c" : [9,8,7,6,5,4,3,2,1,1],
+    'wts' : [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,2]
+})
 
-# tabs(test_data_all, "a", display="cell")
+test_data_na = pd.DataFrame({
+        "a" : [1,np.nan,3,4,5,1,np.nan,3,4,5],
+        "b" : [1,2,3,4,9,9,9,np.nan,2,1],
+        "c" : [9,8,7,6,5,4,3,2,1,1],
+        'wts' : [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,2]
+    })
+
+test_data_short_na = pd.DataFrame({
+        "a" : [1,np.nan,1,2],
+        "b" : [1,2,3,4],
+        "c" : ['a','a','b','b'],
+        'wts' : [0.1,0.1,0.1,2]
+    })
+
+other = tabs(test_data_short_na, "a", "b", display="column", dropna=False)
+test_data = pd.DataFrame({
+    1:[100.0,0.0],
+    2:[0.0,0.0],
+    3:[100.0,0.0],
+    4:[0.0,100.0],
+})
+
+test_data.index = [1.0,2.0]
+
+all(test_data == other)
