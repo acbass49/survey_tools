@@ -4,10 +4,10 @@ This is a simple python package for survey research analysis containing convenie
 
 # Assorted Python Functions for Survey Research
 
-1. Tabs Function (make 3 way + make tables nicer)
-2. Recoding Levels Function (Similar to car::recode in R)
-3. Get names function
-4. Get confidence intervals
+1. Tabs Function - 1, 2, and 3 way tabs. Make them weighted or unweighted. Have them include NAs or not. Have them be counts or normalized by row, column, or cell.
+2. Recoding Levels Function (Similar to car::recode in R) - Select a variable and create a simple recoding string to easily recode variables.
+3. Get names function - Use regex to easily select names in a pandas.DataFrame
+4. Get confidence intervals - Returns a dataframe of a count with lower and upper bound confidence intervals.
 
 # Future Add-ons
 1. Weighting function
