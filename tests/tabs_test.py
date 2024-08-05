@@ -107,8 +107,8 @@ def test_1_way_unweighted_cell_na_true(test_data_na):
         pd.Series([20.0,20.0,20.0,20.0,20.0])
     )
 
-def test_2_way_unweighted_row(test_data_short_na):
-    res = tabs(test_data_short_na, "a", "b", display="row")
+def test_2_way_unweighted_col(test_data_short_na):
+    res = tabs(test_data_short_na, "a", "b", display="col")
     truth = pd.DataFrame({
         1:[50.0,0.0],
         2:[0.0,0.0],
@@ -119,7 +119,7 @@ def test_2_way_unweighted_row(test_data_short_na):
     assert all(res == truth)
 
 def test_2_way_unweighted_cell(test_data_short_na):
-    res = tabs(test_data_short_na, "a", "b", display="row")
+    res = tabs(test_data_short_na, "a", "b", display="cell")
     truth = pd.DataFrame({
         1:[33.3,0.0],
         2:[0.0,0.0],
@@ -129,7 +129,7 @@ def test_2_way_unweighted_cell(test_data_short_na):
     truth.index = [1.0,2.0]
     assert all(res == truth)
 
-def test_2_way_unweighted_col(test_data_short_na):
+def test_2_way_unweighted_row(test_data_short_na):
     res = tabs(test_data_short_na, "a", "b", display="row")
     truth = pd.DataFrame({
         1:[100.0,0.0],
