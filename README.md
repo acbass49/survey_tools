@@ -15,3 +15,4 @@ This is a simple python package for survey research analysis containing convenie
 3. Stacking survey
 
 link I was working on: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+link to publish releases: https://medium.com/@blackary/publishing-a-python-package-from-github-to-pypi-in-2024-a6fb8635d45d
