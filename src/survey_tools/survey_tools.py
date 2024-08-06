@@ -382,35 +382,139 @@ def get_names(data, match_str):
     assert isinstance(match_str, str), '`match_str` must be a `str`'
     return list(data.filter(regex=match_str).columns)
 
-test_data_all = pd.DataFrame({
-    "a" : [1,2,3,4,5,1,2,3,4,5],
-    "b" : [1,2,3,4,9,9,9,3,2,1],
-    "c" : [9,8,7,6,5,4,3,2,1,1],
-    'wts' : [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,2]
+# test_data_all = pd.DataFrame({
+#     "a" : [1,2,3,4,5,1,2,3,4,5],
+#     "b" : [1,2,3,4,9,9,9,3,2,1],
+#     "c" : [9,8,7,6,5,4,3,2,1,1],
+#     'wts' : [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,2]
+# })
+
+# test_data_na = pd.DataFrame({
+#         "a" : [1,np.nan,3,4,5,1,np.nan,3,4,5],
+#         "b" : [1,2,3,4,9,9,9,np.nan,2,1],
+#         "c" : [9,8,7,6,5,4,3,2,1,1],
+#         'wts' : [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,2]
+#     })
+
+# test_data_short_na = pd.DataFrame({
+#         "a" : [1,np.nan,1,2],
+#         "b" : [1,2,3,4],
+#         "c" : ['a','a','b','b'],
+#         'wts' : [0.1,0.1,0.1,2]
+#     })
+
+# other = tabs(test_data_short_na, "a", "b", display="column", dropna=False)
+# test_data = pd.DataFrame({
+#     1:[100.0,0.0],
+#     2:[0.0,0.0],
+#     3:[100.0,0.0],
+#     4:[0.0,100.0],
+# })
+
+# test_data.index = [1.0,2.0]
+
+# all(test_data == other)
+
+survey_data = pd.DataFrame({
+    'a':[1,1,2,2,2,2,2,2,2,2],
+    'b':[1,1,1,1,1,2,2,2,2,2],
+    'c':[1,1,1,1,2,2,2,2,2,2],
+    'd':[1,1,1,1,1,1,2,2,2,2],
 })
 
-test_data_na = pd.DataFrame({
-        "a" : [1,np.nan,3,4,5,1,np.nan,3,4,5],
-        "b" : [1,2,3,4,9,9,9,np.nan,2,1],
-        "c" : [9,8,7,6,5,4,3,2,1,1],
-        'wts' : [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,2]
-    })
-
-test_data_short_na = pd.DataFrame({
-        "a" : [1,np.nan,1,2],
-        "b" : [1,2,3,4],
-        "c" : ['a','a','b','b'],
-        'wts' : [0.1,0.1,0.1,2]
-    })
-
-other = tabs(test_data_short_na, "a", "b", display="column", dropna=False)
-test_data = pd.DataFrame({
-    1:[100.0,0.0],
-    2:[0.0,0.0],
-    3:[100.0,0.0],
-    4:[0.0,100.0],
+weighting_props = pd.DataFrame({
+    'Names':['c', 'c', 'd', 'd'],
+    'Levels':[1,2,1,2],
+    'Proportions':[0.5,0.5,0.5,0.5],
 })
 
-test_data.index = [1.0,2.0]
+def rake_weight(
+    data:pd.DataFrame,
+    weighting_df:pd.DataFrame,
+    cap:int = 10,
+    weight_nm:str = 'weight'
+):
+    '''Weight data using raking given a weighting `pd.DataFrame`. Returns a new `pd.DataFrame` with an additional column
+    with the new weights.
+    
+    Required Arguments:
+        data: `pandas.DataFrame` of wide survey data
+        weighting_df: `pandas.DataFrame` of variables to weight on. All levels of weighting variables must be in data.
+            Weigting variables cannot be missing data. If there exists a category less than 5%, will throw error. 
+            First column is weighting variables names. Second column is weighting variable levels. Third column
+            is target proportion. Columns should be named: `Names`, `Levels`, and `Proportions`.
+    
+    Keyword Arguments:
+        cap: `int` default value 10. Weights will not be above cap.
+        weight_nm: `str` default value is `weight`. Specify different name if desired.
+    
+    Returns:
+        New `pandas.DataFrame` of original survey data with additional weighting column
+    '''
+    #Checking `weighting_df` is set up correctly
+    assert weighting_df.shape[1] == 3, 'only three columns allowed in `weighting_df`'
+    assert weighting_df.columns.to_list() == ['Names', 'Levels', 'Proportions'], 'names of `weighting_df` are incorrect'
+    missing_cols = [col not in data.columns.to_list() for col in weighting_df.Names.to_list()]
+    assert not all(missing_cols), f'these are not in data columns: \
+        {list(set(weighting_df.Names[missing_cols].to_list()))}'
+    assert all(weighting_df.groupby('Names')['Proportions'].sum().eq(1)), \
+        f'All proportions of weighting variables must sum to 1 in `weighting_df` \
+            {weighting_df.groupby('Names')['Proportions'].sum()}'
+    assert weighting_df.isna().sum().sum() == 0, 'No NAs allowed in `weighting_df`'
+    
+    #Check no NA in weighting variables
+    weighting_cols = weighting_df.Names.drop_duplicates().to_list()
+    base = data[weighting_cols].isna().sum()
+    cols_w_NAs = base.index[base.ne(0)].to_list()
+    assert len(cols_w_NAs) != 0, f'These cols have NAs:{cols_w_NAs}'
+    
+    #Check all levels are in data
+    for col in weighting_cols:
+        lvls_in_data = set(data[col].value_counts().index.to_list())
+        lvls_in_wts = set(weighting_df.query('Names == @col').Levels.to_list())
+        assert len(lvls_in_data) == len(lvls_in_wts), \
+            f'for {col}, {lvls_in_data} in data and {lvls_in_wts} in weights'
+    
+    #Check all levels are >5% of data
+    for col in weighting_cols:
+        lvls_in_data = data[col].value_counts(normalize = True).lt(0.05)
+        low_lvls = lvls_in_data.index[lvls_in_data.lt(0.05)].to_list()
+        assert len(low_lvls) == 0, f'for {col}, these levels are below 5%: {low_lvls}'
+    
+    # Begin Algorithm... 
+    # Step 1: Generate new column for weights
+    data[weight_nm] = 1
+    
+    # Step 2: Iterate through each variable resetting proportions
+    N = data.shape[0]
+    Not_Converged_Flag = True
+    iterations = 0
+    
+    while Not_Converged_Flag:
+        
+        iterations += 1
+    
+        for wt_col in weighting_cols:
+            wt_truth = weighting_df[weighting_df.Names == wt_col]
+            data_state = data[wt_col].value_counts(normalize = True)
+            wt_truth_it = wt_truth.Levels.to_list()
+            
+            for lvl in wt_truth_it:
+                true_count = np.multiply(wt_truth[wt_truth.Levels == lvl].iloc[0],N)
+                data_count = np.multiply(data_state.loc(lvl),N)
+                scaling_factor = np.divide(true_count/data_count)
+                data.loc[data[wt_col]==lvl, wt_col] = \
+                    np.multiply(data.loc[data[wt_col]==lvl, wt_col],scaling_factor)
+            
+            #reset weights to sum to N
+            scaling_factor = np.divide(N,data[wt_col].sum())
+            data[wt_col] = np.multiply(data[wt_col],scaling_factor)
+        
+        # Step 3: Check all proportion alignment if not repeat Step 2
+        
+        #insert check for convergence function and stop at 10_000 iterations
+    
+    
+    return data
 
-all(test_data == other)
+rake_weight(data=survey_data, weighting_df=weighting_props)
