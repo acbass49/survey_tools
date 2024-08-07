@@ -5,7 +5,7 @@ import functools
 import operator
 import warnings
 
-def tabs(data, var1, var2 = None, var3=None, wts = None, display = "count", dropna = True):
+def tabs(data:pd.DataFrame, var1:str, var2:str = None, var3:str=None, wts:str = None, display:str = "count", dropna:bool = True):
     '''
     Tabulate your data with 1, 2, and 3 variables. Use weighted counts if desired. 
     Get counts or proportions by cell, row, or column. Drop NaNs or include them in your tabulations.
@@ -428,11 +428,20 @@ weighting_props = pd.DataFrame({
     'Proportions':[0.5,0.5,0.5,0.5],
 })
 
+def _check_eq(data, weighting_df, weight_nm):
+    col_bools = []
+    for wt_col in weighting_df.Names.drop_duplicates().to_list():
+        are_equal = tabs(data, wt_col, wts=weight_nm, display='column').sort_index().round(1).to_list() == \
+            weighting_df[weighting_df.Names == wt_col].set_index('Levels')['Proportions'].mul(100).sort_index().round(1).to_list()
+        col_bools.append(are_equal)
+    return all(col_bools)
+
 def rake_weight(
     data:pd.DataFrame,
     weighting_df:pd.DataFrame,
     cap:int = 10,
-    weight_nm:str = 'weight'
+    weight_nm:str = 'weight',
+    qa:bool = True
 ):
     '''Weight data using raking given a weighting `pd.DataFrame`. Returns a new `pd.DataFrame` with an additional column
     with the new weights.
@@ -447,6 +456,7 @@ def rake_weight(
     Keyword Arguments:
         cap: `int` default value 10. Weights will not be above cap.
         weight_nm: `str` default value is `weight`. Specify different name if desired.
+        qa: `bool` default is True. Prints weighting diagnostics.
     
     Returns:
         New `pandas.DataFrame` of original survey data with additional weighting column
@@ -459,14 +469,15 @@ def rake_weight(
         {list(set(weighting_df.Names[missing_cols].to_list()))}'
     assert all(weighting_df.groupby('Names')['Proportions'].sum().eq(1)), \
         f'All proportions of weighting variables must sum to 1 in `weighting_df` \
-            {weighting_df.groupby('Names')['Proportions'].sum()}'
+            {weighting_df.groupby("Names")["Proportions"].sum()}'
     assert weighting_df.isna().sum().sum() == 0, 'No NAs allowed in `weighting_df`'
+    assert weight_nm not in data.columns.to_list(), f'`weight_nm`: {weight_nm} should not be in data already'
     
     #Check no NA in weighting variables
     weighting_cols = weighting_df.Names.drop_duplicates().to_list()
     base = data[weighting_cols].isna().sum()
     cols_w_NAs = base.index[base.ne(0)].to_list()
-    assert len(cols_w_NAs) != 0, f'These cols have NAs:{cols_w_NAs}'
+    assert len(cols_w_NAs) == 0, f'These cols have NAs:{cols_w_NAs}'
     
     #Check all levels are in data
     for col in weighting_cols:
@@ -477,9 +488,10 @@ def rake_weight(
     
     #Check all levels are >5% of data
     for col in weighting_cols:
-        lvls_in_data = data[col].value_counts(normalize = True).lt(0.05)
-        low_lvls = lvls_in_data.index[lvls_in_data.lt(0.05)].to_list()
-        assert len(low_lvls) == 0, f'for {col}, these levels are below 5%: {low_lvls}'
+        lvls_in_data = data[col].value_counts(normalize = True).gt(0.05)
+        assert all(lvls_in_data), f'some levels are not >5% of data. E.G. \
+            {data[col].value_counts(normalize = True)}'
+            
     
     # Begin Algorithm... 
     # Step 1: Generate new column for weights
@@ -495,25 +507,33 @@ def rake_weight(
         iterations += 1
     
         for wt_col in weighting_cols:
+            
             wt_truth = weighting_df[weighting_df.Names == wt_col]
-            data_state = data[wt_col].value_counts(normalize = True)
+            data_state = tabs(data, wt_col, wts=weight_nm, display='column')
             wt_truth_it = wt_truth.Levels.to_list()
             
             for lvl in wt_truth_it:
-                true_count = np.multiply(wt_truth[wt_truth.Levels == lvl].iloc[0],N)
-                data_count = np.multiply(data_state.loc(lvl),N)
-                scaling_factor = np.divide(true_count/data_count)
-                data.loc[data[wt_col]==lvl, wt_col] = \
-                    np.multiply(data.loc[data[wt_col]==lvl, wt_col],scaling_factor)
+                true_count = np.multiply(wt_truth[wt_truth.Levels == lvl]['Proportions'].iloc[0],N)
+                data_count = np.multiply(data_state.div(100).loc[lvl],N)
+                scaling_factor = np.divide(true_count,data_count)
+                data.loc[data[wt_col]==lvl, weight_nm] = \
+                    np.multiply(data.loc[data[wt_col]==lvl, weight_nm],scaling_factor)
             
             #reset weights to sum to N
-            scaling_factor = np.divide(N,data[wt_col].sum())
-            data[wt_col] = np.multiply(data[wt_col],scaling_factor)
+            scaling_factor = np.divide(N,data[weight_nm].sum())
+            data[weight_nm] = np.multiply(data[weight_nm],scaling_factor)
         
         # Step 3: Check all proportion alignment if not repeat Step 2
+        if _check_eq(data, weighting_df, weight_nm):
+            Not_Converged_Flag = False
         
-        #insert check for convergence function and stop at 10_000 iterations
-    
+        if iterations >= 10_000:
+            raise Exception("Iterations exceeded 10_000 without converging. Please review data or adjust variables.")
+        
+    if qa:
+        for var in weighting_cols:
+            print(var)
+            print(tabs(data, var, wts=weight_nm, display='column'))
     
     return data
 
