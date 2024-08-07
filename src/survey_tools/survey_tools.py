@@ -190,7 +190,7 @@ def tabs(data:pd.DataFrame, var1:str, var2:str = None, var3:str=None, wts:str = 
         return response
     if display == "row":
         if isinstance(response, pd.Series):
-            raise Exception("There was only one column, so adding them row-wise doesn't make sense")
+            raise Exception("There was only one column, so summarizing them row-wise doesn't make sense")
         if var3 is not None: #is a 3way crosstab
             return response.groupby(level=[0], axis = 1) \
                 .transform(lambda s: round(s/sum(s),3)*100).fillna(0.0)
@@ -502,6 +502,7 @@ def rake_weight(
     N = data.shape[0]
     Not_Converged_Flag = True
     iterations = 0
+    safety_cap = np.subtract(cap,0.1)
     
     while Not_Converged_Flag:
         
@@ -520,16 +521,12 @@ def rake_weight(
                 data.loc[data[wt_col]==lvl, weight_nm] = \
                     np.multiply(data.loc[data[wt_col]==lvl, weight_nm],scaling_factor)
             
-            #reset weights to sum to N
-            scaling_factor = np.divide(N,data[weight_nm].sum())
-            data[weight_nm] = np.multiply(data[weight_nm],scaling_factor)
-            
             #create minimum and cap
             # if any(data[weight_nm].lt(0.1)):
             #     data.loc[data[weight_nm].lt(0.1), weight_nm] = 0.1
             #     reset = True
-            if any(data[weight_nm].gt(10)):
-                data.loc[data[weight_nm].gt(10), weight_nm] = cap
+            if any(data[weight_nm].gt(safety_cap)):
+                data.loc[data[weight_nm].gt(safety_cap), weight_nm] = safety_cap
                 reset = True
             
             if reset:
@@ -540,6 +537,10 @@ def rake_weight(
         # Step 3: Check all proportion alignment if not repeat Step 2
         if _check_eq(data, weighting_df, weight_nm):
             Not_Converged_Flag = False
+        
+        #reset weights to sum to N
+        scaling_factor = np.divide(N,data[weight_nm].sum())
+        data[weight_nm] = np.multiply(data[weight_nm],scaling_factor)
         
         if iterations >= 5_000:
             for var in weighting_cols:
