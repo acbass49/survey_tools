@@ -472,6 +472,7 @@ def rake_weight(
             {weighting_df.groupby("Names")["Proportions"].sum()}'
     assert weighting_df.isna().sum().sum() == 0, 'No NAs allowed in `weighting_df`'
     assert weight_nm not in data.columns.to_list(), f'`weight_nm`: {weight_nm} should not be in data already'
+    reset = False
     
     #Check no NA in weighting variables
     weighting_cols = weighting_df.Names.drop_duplicates().to_list()
@@ -522,18 +523,47 @@ def rake_weight(
             #reset weights to sum to N
             scaling_factor = np.divide(N,data[weight_nm].sum())
             data[weight_nm] = np.multiply(data[weight_nm],scaling_factor)
+            
+            #create minimum and cap
+            # if any(data[weight_nm].lt(0.1)):
+            #     data.loc[data[weight_nm].lt(0.1), weight_nm] = 0.1
+            #     reset = True
+            if any(data[weight_nm].gt(10)):
+                data.loc[data[weight_nm].gt(10), weight_nm] = cap
+                reset = True
+            
+            if reset:
+                scaling_factor = np.divide(N,data[weight_nm].sum())
+                data[weight_nm] = np.multiply(data[weight_nm],scaling_factor)
+                reset = False
         
         # Step 3: Check all proportion alignment if not repeat Step 2
         if _check_eq(data, weighting_df, weight_nm):
             Not_Converged_Flag = False
         
-        if iterations >= 10_000:
-            raise Exception("Iterations exceeded 10_000 without converging. Please review data or adjust variables.")
+        if iterations >= 5_000:
+            for var in weighting_cols:
+                print("Variable: ",var)
+                print(tabs(data, var, wts=weight_nm, display='column'))
+            print(f'''
+                Iterations: {iterations}
+                Max Weight: {data[weight_nm].max()}
+                Min Weight: {data[weight_nm].min()}
+                '''
+            )
+            print(data)
+            raise Exception("Iterations exceeded 5_000 without converging. Please review data or adjust variables.")
         
     if qa:
         for var in weighting_cols:
-            print(var)
+            print("Variable: ",var)
             print(tabs(data, var, wts=weight_nm, display='column'))
+        print(f'''
+            Iterations: {iterations}
+            Max Weight: {data[weight_nm].max()}
+            Min Weight: {data[weight_nm].min()}
+            '''
+        )
     
     return data
 
