@@ -243,12 +243,16 @@ def recode(data, var, recode_str):
     #filter dict to make only relevant changes
     recode_dict = {k:v for k,v in recode_dict.items() if k != v}
     
+    to_delete = {}
     for k,v in recode_dict.items():
         if k == "NaN":
-            del recode_dict[k]
-            recode_dict[np.nan] = v
+            to_delete[k] = v
         if v == "NaN":
             recode_dict[k] = np.nan
+    
+    for k,v in to_delete.items():
+        del recode_dict[k]
+        recode_dict[np.nan] = v
     
     exp = data[var].replace(recode_dict)
     
@@ -415,18 +419,18 @@ def get_names(data, match_str):
 
 # all(test_data == other)
 
-survey_data = pd.DataFrame({
-    'a':[1,1,2,2,2,2,2,2,2,2],
-    'b':[1,1,1,1,1,2,2,2,2,2],
-    'c':[1,1,1,1,2,2,2,2,2,2],
-    'd':[1,1,1,1,1,1,2,2,2,2],
-})
+# survey_data = pd.DataFrame({
+#     'a':[1,1,2,2,2,2,2,2,2,2],
+#     'b':[1,1,1,1,1,2,2,2,2,2],
+#     'c':[1,1,1,1,2,2,2,2,2,2],
+#     'd':[1,1,1,1,1,1,2,2,2,2],
+# })
 
-weighting_props = pd.DataFrame({
-    'Names':['c', 'c', 'd', 'd'],
-    'Levels':[1,2,1,2],
-    'Proportions':[0.5,0.5,0.5,0.5],
-})
+# weighting_props = pd.DataFrame({
+#     'Names':['c', 'c', 'd', 'd'],
+#     'Levels':[1,2,1,2],
+#     'Proportions':[0.5,0.5,0.5,0.5],
+# })
 
 def _check_eq(data, weighting_df, weight_nm):
     col_bools = []
@@ -568,4 +572,4 @@ def rake_weight(
     
     return data
 
-rake_weight(data=survey_data, weighting_df=weighting_props)
+# rake_weight(data=survey_data, weighting_df=weighting_props)
