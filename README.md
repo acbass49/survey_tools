@@ -9,10 +9,14 @@ This is a simple python package for survey research analysis containing convenie
 3. `recode` (Similar to car::recode in R) - Select a variable and create a simple recoding string to easily recode variables.
 4. `get_names` function - Use regex to easily select names in a given pandas.DataFrame
 
+# ToDo
+1. Build a vignette on personal website and jupyter notebook in the repository. Or perhaps create my own website for the package?
+
 # Future Add-ons
 1. Add CI function
 2. Stacking survey
 3. Add other weighting functions like matching, propensity weighting, or multiple combinations of these and raking.
 
-link I was working on: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+
+link I was working on: https://packaging.python.org/en/latest/tutorials/packaging-projects/  
 link to publish releases: https://medium.com/@blackary/publishing-a-python-package-from-github-to-pypi-in-2024-a6fb8635d45d
