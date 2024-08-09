@@ -1,6 +1,6 @@
 # survey_tools
 
-This is a simple python package for survey research analysis containing convenient functions for crosstabs, recoding, and weighting.
+This is a simple python package for survey research analysis containing convenient functions for weighted crosstabs, recoding, and weighting.
 
 # Assorted Python Functions for Survey Research
 
