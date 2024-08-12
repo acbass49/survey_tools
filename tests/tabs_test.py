@@ -6,7 +6,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from ..src.survey_tools import tabs
+from survey_tools import tabs
 
 @pytest.fixture
 def test_data_all():

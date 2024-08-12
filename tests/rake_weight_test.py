@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from ..src.survey_tools import rake_weight, tabs
+from survey_tools import rake_weight, tabs
 
 @pytest.fixture
 def test_survey_data():

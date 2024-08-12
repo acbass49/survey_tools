@@ -6,7 +6,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from ..src.survey_tools import get_names
+from survey_tools import get_names
 
 @pytest.fixture
 def test_data_names():
