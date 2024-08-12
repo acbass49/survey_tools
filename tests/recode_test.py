@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from ..src.survey_tools import recode
+from survey_tools.survey_tools import recode
 
 @pytest.fixture
 def data():
