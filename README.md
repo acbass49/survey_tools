@@ -40,6 +40,3 @@ get_names(data, r'^[Yy]ear.+')
 1. Add CI function
 2. Stacking survey
 3. Add other weighting functions like matching, propensity weighting, or multiple combinations of these and raking.
-
-link I was working on: https://packaging.python.org/en/latest/tutorials/packaging-projects/  
-link to publish releases: https://medium.com/@blackary/publishing-a-python-package-from-github-to-pypi-in-2024-a6fb8635d45d
