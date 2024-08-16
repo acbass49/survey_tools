@@ -16,10 +16,10 @@ authors = [
 maintainers = [
     {name = "Alex Bass", email = "acbass49@gmail.com"},
 ]
-description = "Tools for Survey Wrangling and Analysis for Users of Pandas"
+description = "Simple python tools for survey research analysis for users of Pandas"
 readme = "README.md"
 license = {file = "LICENSE.txt"}
-keywords = ["Survey Research", "Crosstabs", "Survey", "Recode"]
+keywords = ["Survey Research", "Crosstabs", "Weighting", "Recode"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -29,4 +29,4 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/acbass49/survey_tools"
 Issues = "https://github.com/acbass49/survey_tools/issues"
-Vinette = "https://alexbass.me/projects/survey_tools/"
+Vignette = "https://alexbass.me/projects/survey_tools/"

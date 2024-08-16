@@ -2,12 +2,20 @@
 
 This is a simple python package for survey research analysis containing convenient functions for weighted crosstabs, recoding, and weighting.
 
+# Install
+
+You can install survey_tools with `pip`:
+
+```
+python -m pip install survey_tools
+```
+
 # Assorted Python Functions for Survey Research
 
 `tabs` - 1, 2, and 3 way tabs. Make them weighted or unweighted. Have them include NAs or not. Have them be counts or normalized by row, column, or cell.
 
 ```python
-tabs(data, 'var_name', display='col', wts='weight_var', dropna=False)
+tabs(data, 'var_name', display='column', wts='weight_var', dropna=False)
 ```
 
 `rake_weight` - weight a survey to specified targets using the raking method.
