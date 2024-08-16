@@ -18,7 +18,7 @@ def test_simple_recode(data):
     assert all(recode(data, 'a', '1=2').eq(2))
     
 def test_recoding_NaN(data):
-    assert all(recode(data, 'b', 'NA=2').eq(2))
+    assert all(recode(data, 'b', 'NaN=2').eq(2))
     
 def test_recoding_strings(data):
     assert all(recode(data, 'c', '"a"="c"').eq('c'))

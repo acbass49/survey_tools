@@ -23,7 +23,7 @@ def test_weighting_props():
     })
     return exp
 
-def weights_work(test_survey_data,test_weighting_props):
+def test_weights_work(test_survey_data,test_weighting_props):
     data = rake_weight(data=test_survey_data, weighting_df=test_weighting_props)
     assert tabs(data, 'c', wts='weight', display='column').to_list() == \
         tabs(data, 'd', wts='weight', display='column').to_list()

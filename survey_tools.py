@@ -385,52 +385,6 @@ def get_names(data, match_str):
     assert isinstance(match_str, str), '`match_str` must be a `str`'
     return list(data.filter(regex=match_str).columns)
 
-# test_data_all = pd.DataFrame({
-#     "a" : [1,2,3,4,5,1,2,3,4,5],
-#     "b" : [1,2,3,4,9,9,9,3,2,1],
-#     "c" : [9,8,7,6,5,4,3,2,1,1],
-#     'wts' : [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,2]
-# })
-
-# test_data_na = pd.DataFrame({
-#         "a" : [1,np.nan,3,4,5,1,np.nan,3,4,5],
-#         "b" : [1,2,3,4,9,9,9,np.nan,2,1],
-#         "c" : [9,8,7,6,5,4,3,2,1,1],
-#         'wts' : [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,2]
-#     })
-
-# test_data_short_na = pd.DataFrame({
-#         "a" : [1,np.nan,1,2],
-#         "b" : [1,2,3,4],
-#         "c" : ['a','a','b','b'],
-#         'wts' : [0.1,0.1,0.1,2]
-#     })
-
-# other = tabs(test_data_short_na, "a", "b", display="column", dropna=False)
-# test_data = pd.DataFrame({
-#     1:[100.0,0.0],
-#     2:[0.0,0.0],
-#     3:[100.0,0.0],
-#     4:[0.0,100.0],
-# })
-
-# test_data.index = [1.0,2.0]
-
-# all(test_data == other)
-
-# survey_data = pd.DataFrame({
-#     'a':[1,1,2,2,2,2,2,2,2,2],
-#     'b':[1,1,1,1,1,2,2,2,2,2],
-#     'c':[1,1,1,1,2,2,2,2,2,2],
-#     'd':[1,1,1,1,1,1,2,2,2,2],
-# })
-
-# weighting_props = pd.DataFrame({
-#     'Names':['c', 'c', 'd', 'd'],
-#     'Levels':[1,2,1,2],
-#     'Proportions':[0.5,0.5,0.5,0.5],
-# })
-
 def _check_eq(data, weighting_df, weight_nm):
     col_bools = []
     for wt_col in weighting_df.Names.drop_duplicates().to_list():
@@ -570,5 +524,3 @@ def rake_weight(
         )
     
     return data
-
-# rake_weight(data=survey_data, weighting_df=weighting_props)

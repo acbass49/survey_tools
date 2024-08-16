@@ -49,15 +49,14 @@ def test_1_way_weighted_count(test_data_all):
 
 def test_1_way_unweighted_column(test_data_all):
     assert _series_is_equal(
-        tabs(test_data_all, "a", display="column", wts="wts"), 
+        tabs(test_data_all, "a", display="column"), 
         pd.Series([20,20,20,20,20])
     )
 
 def test_1_way_weighted_column(test_data_all):
-    assert _series_is_equal(
-        tabs(test_data_all, "a", display="column", wts="wts"), 
-        pd.Series([6.9,6.9,6.9,6.9,72.4])
-    )
+    assert \
+        tabs(test_data_all, "a", display="column", wts="wts").round(1).to_list() == \
+        [6.9,6.9,6.9,6.9,72.4]
 
 def test_1_way_unweighted_cell(test_data_all):
     assert _series_is_equal(
@@ -66,49 +65,42 @@ def test_1_way_unweighted_cell(test_data_all):
     )
 
 def test_1_way_weighted_cell(test_data_all):
-    assert _series_is_equal(
-        tabs(test_data_all, "a", display="cell", wts="wts"), 
-        pd.Series([6.9,6.9,6.9,6.9,72.4])
-    )
+    assert \
+        tabs(test_data_all, "a", display="cell", wts="wts").round(1).to_list() == \
+        [6.9,6.9,6.9,6.9,72.4]
 
-def test_1_way_weighted_cell_na(test_data_na):
-    assert _series_is_equal(
-        tabs(test_data_na, "a", display="cell", wts="wts"), 
-        pd.Series([7.4,7.4,7.4,7.4,77.8])
-    )
+def test_1_way_weighted_cell_na(test_data_NA):
+    assert \
+        tabs(test_data_NA, "a", display="cell", wts="wts").round(1).to_list() == \
+        [7.4,7.4,7.4,77.8]
 
-def test_1_way_weighted_cell_w_na(test_data_na):
-    assert _series_is_equal(
-        tabs(test_data_na, "a", display="cell", wts="wts", dropna=False), 
-        pd.Series([6.9,6.9,6.9,72.4,6.9])
-    )
+def test_1_way_weighted_cell_w_na(test_data_NA):
+    assert \
+        tabs(test_data_NA, "a", display="cell", wts="wts", dropna=False).round(1).to_list() == \
+        [6.9,6.9,6.9,72.4,6.9]
 
-def test_1_way_weighted_column_w_na(test_data_na):
-    assert _series_is_equal(
-        tabs(test_data_na, "a", display="column", wts="wts",dropna=False), 
-        pd.Series([6.9,6.9,6.9,72.4,6.9])
-    )
+def test_1_way_weighted_column_w_na(test_data_NA):
+    assert \
+        tabs(test_data_NA, "a", display="column", wts="wts",dropna=False).round(1).to_list() == \
+        [6.9,6.9,6.9,72.4,6.9]
 
-def test_1_way_weighted_column_na_true(test_data_na):
-    assert _series_is_equal(
-        tabs(test_data_na, "a", display="column", wts="wts"), 
-        pd.Series([7.4,7.4,7.4,7.4,77.8])
-    )
+def test_1_way_weighted_column_na_true(test_data_NA):
+    assert \
+        tabs(test_data_NA, "a", display="column", wts="wts").round(1).to_list() == \
+        [7.4,7.4,7.4,77.8]
 
-def test_1_way_weighted_cell_na_true(test_data_na):
-    assert _series_is_equal(
-        tabs(test_data_na, "a", display="cell", wts="wts"), 
-        pd.Series([7.4,7.4,7.4,7.4,77.8])
-    )
+def test_1_way_weighted_cell_na_true(test_data_NA):
+    assert \
+        tabs(test_data_NA, "a", display="cell", wts="wts").round(1).to_list() ==\
+        [7.4,7.4,7.4,77.8]
 
-def test_1_way_unweighted_cell_na_true(test_data_na):
-    assert _series_is_equal(
-        tabs(test_data_na, "a", display="cell", dropna=False), 
-        pd.Series([20.0,20.0,20.0,20.0,20.0])
-    )
+def test_1_way_unweighted_cell_na_true(test_data_NA):
+    assert \
+        tabs(test_data_NA, "a", display="cell", dropna=False).round(1).to_list() == \
+        [20.0,20.0,20.0,20.0,20.0]
 
 def test_2_way_unweighted_col(test_data_short_na):
-    res = tabs(test_data_short_na, "a", "b", display="col")
+    res = tabs(test_data_short_na, "a", "b", display="column")
     truth = pd.DataFrame({
         1:[50.0,0.0],
         2:[0.0,0.0],
