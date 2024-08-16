@@ -25,7 +25,7 @@ recode(data, 'var_name', 'lo:5=1;6:10=2;11:hi=3;NaN=NaN')
 `get_names` function - Use regex to easily select names in a given pandas.DataFrame
 
 ```python
-get_names(data, '^[Yy]ear.+')
+get_names(data, r'^[Yy]ear.+')
 ```
 
 # Future Add-ons

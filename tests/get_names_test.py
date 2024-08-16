@@ -35,9 +35,9 @@ def test_simple_match(test_data_names):
         ['a', 'ab', 'bas2df', 'aasdf', 'wtsacrne;irg']
 
 def test_special_char_match1(test_data_names):
-    assert get_names(test_data_names, "\s") == \
+    assert get_names(test_data_names, r"\s") == \
         ['c ', 'bvc sdr']
 
 def test_special_char_match2(test_data_names):
-    assert get_names(test_data_names, "\d") == \
+    assert get_names(test_data_names, r"\d") == \
         ['bas2df', 'wts12']

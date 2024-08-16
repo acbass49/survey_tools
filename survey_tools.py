@@ -453,7 +453,7 @@ def rake_weight(
     
     # Begin Algorithm... 
     # Step 1: Generate new column for weights
-    data[weight_nm] = 1
+    data[weight_nm] = 1.0
     
     # Step 2: Iterate through each variable resetting proportions
     N = data.shape[0]
