@@ -171,6 +171,14 @@ def tabs(data:pd.DataFrame, var1:str, var2:str = None, var3:str=None, wts:str = 
         if not dropna:
             categories = categories + ["NaN"]
         response = response.reindex(categories)
+    else:
+        if not dropna:
+            categories = list(var1.unique())
+            categories.sort()
+            categories.append("NaN")
+            response = response.reindex(categories)
+        else:
+            response = response.sort_index()
     
     if type_q == "2way unweighted" or type_q == "2way weighted":
         if _is_ordered_category_var(var2):
@@ -180,6 +188,14 @@ def tabs(data:pd.DataFrame, var1:str, var2:str = None, var3:str=None, wts:str = 
             assert set(categories) == set(response.columns.to_list()), \
                 f"there was a problem with the categories of '{var2}'."
             response = response[categories]
+        else:
+            if not dropna:
+                categories = list(var2.unique())
+                categories.sort()
+                categories.append("NaN")
+                response = response[categories]
+            else:
+                response = response.sort_index(axis=1)
     
     if var3 is not None:
         response.columns = \
@@ -524,3 +540,39 @@ def rake_weight(
         )
     
     return data
+
+def make_interaction(data, var1, var2):
+    '''
+    Create a new variable that is the interaction of two variables. Generally you want to interact two text columns.
+    Required Arguments:
+        data: `pandas.DataFrame` object which contains var1 and var2
+        var1: `str` of 1st variable name in `data` to use for interaction
+        var2: `str` of 2nd variable name in `data` to use for interaction
+    Returns:
+        New `pandas.DataFrame` with additional interaction
+    '''
+    # make both variables category types
+    if data[var1].dtype.name != 'category':
+        data[var1] = data[var1].astype('category')
+    if data[var2].dtype.name != 'category':
+        data[var2] = data[var2].astype('category')
+    new_cat = _make_interactions_categories(data[var1].cat.categories, data[var2].cat.categories)
+    # make a new variable that is the interaction of the two
+    data[var1 + 'X' + var2] = data[var1].astype(str) + ' ' + data[var2].astype(str)
+    data[var1 + 'X' + var2] = data[var1 + 'X' + var2].astype('category')
+    data[var1 + 'X' + var2] = data[var1 + 'X' + var2].cat.set_categories(new_cat)
+    #make sure NaNs are still in the data
+    if data[var1].isna().any() or data[var2].isna().any():
+        data.loc[((data.var1.isna()) | (data.var2.isna())), f'{var1}X{var2}'] = np.nan
+    print(f'successfully created {var1}X{var2}')
+    return data
+
+def _make_interactions_categories(A, B):
+    '''return list of interactions of categories among two variables'''
+    res = []
+    for a in A:
+        for b in B:
+            res.append(f'{a} {b}')
+    return res
+
+
